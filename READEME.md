@@ -11,10 +11,21 @@ A Retrieval-Augmented Generation (RAG) application built from scratch to chat wi
 
 ## 🛠️ Tech Stack
 - Python
-- LangChain / ChromaDB
+- ChromaDB (Vector Database)
 - Ollama (Llama 3.2 3B)
 - PyPDF
-- HuggingFace Embeddings
+- Sentence-Transformers (HuggingFace Embeddings)
+- Streamlit (Web UI)
+
+## 📸 Demo
+![RAG Paper Chat Demo](demo.png)
+
+## ⚙️ How to Run
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/MonsterKashif/Rag-paper-chat.git
+   cd Rag-paper-chat
 
 ## 📁 Project Structure
 ```text
