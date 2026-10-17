@@ -10,47 +10,44 @@ Run:
 """
  
 import streamlit as st
- 
+import os
 from rag_chain import ask_with_sources
- 
-st.set_page_config(page_title="RAG Paper Chat", page_icon="📄")
- 
-st.title("📄 RAG Paper Chat")
-st.caption(
-    "Ask questions about classic ML papers (Attention, BERT, ResNet, GPT-3, LoRA). "
-    "Answers are grounded only in the paper text -- no made-up outside knowledge."
-)
- 
+
+st.set_page_config(page_title="RAG Paper Chat", page_icon="📚")
+st.title("📚 RAG Paper Chat")
+st.caption("Ask questions about ML papers. Answers are grounded in the provided PDFs.")
+
+# Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
- 
+
+# Display chat messages from history on app rerun
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
-        if message.get("sources"):
+        if "sources" in message:
             with st.expander("Sources"):
-                for s in message["sources"]:
-                    st.markdown(f"**{s['source']}** · score {s['score']}")
-                    st.caption(s["text"][:300] + "...")
- 
-question = st.chat_input("Ask something about the papers...")
- 
-if question:
-    st.session_state.messages.append({"role": "user", "content": question})
+                for src in message["sources"]:
+                    st.write(f"- {src}")
+
+# Accept user input
+if prompt := st.chat_input("Ask something about the papers..."):
+    # Add user message to chat history
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    # Display user message in chat message container
     with st.chat_message("user"):
-        st.markdown(question)
- 
+        st.markdown(prompt)
+
+    # Display assistant response in chat message container
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            answer, chunks = ask_with_sources(question)
-        st.markdown(answer)
-        with st.expander("Sources"):
-            for s in chunks:
-                st.markdown(f"**{s['source']}** · score {s['score']}")
-                st.caption(s["text"][:300] + "...")
- 
-    st.session_state.messages.append({
-        "role": "assistant",
-        "content": answer,
-        "sources": chunks,
-    })
+            answer, chunks = ask_with_sources(prompt)
+            st.markdown(answer)
+            
+            sources = list(set([c['source'] for c in chunks]))
+            with st.expander("Sources"):
+                for src in sources:
+                    st.write(f"- {src}")
+            
+            # Add assistant response to chat history
+            st.session_state.messages.append({"role": "assistant", "content": answer, "sources": sources})

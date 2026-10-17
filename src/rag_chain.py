@@ -8,50 +8,59 @@ wrong or outdated) memory. This "grounding" is the whole point of RAG.
 Run interactively:
     python src/rag_chain.py
 """
- 
-import ollama
- 
+import os
+from groq import Groq
+from dotenv import load_dotenv
 from retrieve import retrieve
- 
-MODEL_NAME = "llama3.2:3b"
+
+# Load environment variables (for local testing)
+load_dotenv()
+
+MODEL_NAME = "llama-3.1-8b-instant" # Groq ka naya fast aur free model
+
 TOP_K = 8
- 
+
 SYSTEM_PROMPT = (
-    "You are a research assistant. Answer the question using ONLY the provided context. "
-    "If the context has partial information, summarize it. "
-    "If the context does not contain the answer, say 'I don't have enough information.' "
-    "Do NOT try to compare things unless the context explicitly compares them. "
-    "Always cite the source paper."
+    "You are a research assistant that answers questions about machine "
+    "learning papers using ONLY the context provided below. Do not use "
+    "any outside knowledge, even if you think you know the answer. "
+    "If the context does not contain the answer, say "
+    "\"I don't have enough information in these papers to answer that.\" "
+    "Always mention which paper (source) your answer comes from."
 )
- 
- 
+
+# Groq Client setup
+api_key = os.getenv("GROQ_API_KEY")
+if not api_key:
+    # Streamlit Cloud ke liye (later hum isko handle karenge)
+    import streamlit as st
+    api_key = st.secrets.get("GROQ_API_KEY")
+
+client = Groq(api_key=api_key)
+
 def build_prompt(question: str, chunks: list[dict]) -> str:
     context = "\n\n".join(
         f"[Source: {c['source']}]\n{c['text']}" for c in chunks
     )
     return f"Context:\n{context}\n\nQuestion: {question}\n\nAnswer:"
- 
- 
+
 def ask_with_sources(question: str) -> tuple[str, list[dict]]:
     chunks = retrieve(question, k=TOP_K)
     prompt = build_prompt(question, chunks)
- 
-    response = ollama.chat(
+
+    response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": prompt},
         ],
     )
-    return response["message"]["content"], chunks
- 
- 
+    return response.choices[0].message.content, chunks
+
 def ask(question: str) -> str:
-    """Convenience wrapper for the CLI script -- answer text only."""
     answer, _ = ask_with_sources(question)
     return answer
- 
- 
+
 if __name__ == "__main__":
     print(f"RAG Paper Chat -- using {MODEL_NAME} (type 'quit' to exit)\n")
     while True:
