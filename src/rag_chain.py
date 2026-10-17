@@ -16,8 +16,7 @@ from retrieve import retrieve
 # Load environment variables (for local testing)
 load_dotenv()
 
-MODEL_NAME = "llama-3.1-8b-instant" # Groq ka naya fast aur free model
-
+MODEL_NAME = "llama-3.1-8b-instant"
 TOP_K = 8
 
 SYSTEM_PROMPT = (

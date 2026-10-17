@@ -1,6 +1,5 @@
 venv/
 __pycache__/
-chroma_db/
 data/chunks.json
-data/papers/
 .env
+chroma_db/
