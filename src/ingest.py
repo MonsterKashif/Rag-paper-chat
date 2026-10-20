@@ -52,8 +52,8 @@ def main():
             f"'{DATA_DIR}/' doesn't exist yet. Create it and add your PDFs first."
         )
  
-    pdf_files = sorted(DATA_DIR.glob("*.pdf"))
-    if not pdf_files:
+pdf_files = sorted(list(DATA_DIR.glob("*.pdf")) + list(DATA_DIR.glob("*.PDF")))
+if not pdf_files:
         raise FileNotFoundError(
             f"No PDFs found in {DATA_DIR}/. Add some (see README) and rerun."
         )
